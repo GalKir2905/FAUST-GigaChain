@@ -1,9 +1,10 @@
-from faust_module.log import logger
-import json
+from faust_module.common.log import logger
 
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.output_parsers import StrOutputParser
 from langchain_gigachat.chat_models import GigaChat
-from langchain.prompts import load_prompt
+from langchain.prompts import load_prompt, ChatPromptTemplate, PromptTemplate
+from langchain_experimental.smart_llm import SmartLLMChain
 
 
 class FAUST_GIGACHAT:
@@ -17,6 +18,7 @@ class FAUST_GIGACHAT:
             scope="GIGACHAT_API_PERS",
             model="GigaChat-Pro",
             verify_ssl_certs=False,
+            temperature=2
         )
 
     def get_token(self):
@@ -26,6 +28,11 @@ class FAUST_GIGACHAT:
     def get_models(self):
         response = self.giga.get_models()
         return response.data
+
+    def chat_model_idea(self, hard_question, ideas=3):
+        prompt = PromptTemplate.from_template(hard_question)
+        chain = SmartLLMChain(llm=self.giga, prompt=prompt, n_ideas=ideas, verbose=True)
+        chain.run({})
 
     def chat_model_longer(self, system_role: str ='Ты разработчик на python.'):
         messages = [SystemMessage(content=self.system_role)]
@@ -40,11 +47,25 @@ class FAUST_GIGACHAT:
             logger.info(f"Ответ: {res.content}")
             break
 
-    def work_load_prompt(self, path_to_prompt: str):
+    def correct_mistakes(self, path_to_prompt: str):
         prompt = load_prompt(path_to_prompt)
         messages = [SystemMessage(content=self.system_role)]
         user_input = input(f"Вопрос: ")
         messages.append(HumanMessage(content=prompt.format(text=user_input)))
-        resource = self.giga.invoke(messages).content
-        # logger.info(f"Ответ: {resource}")
-        return resource
+        response = self.giga.invoke(messages).content
+        return response
+
+    def work_load_prompt(self, path_to_prompt: str, question: str):
+        prompt = load_prompt(path_to_prompt)
+        messages = [SystemMessage(content=self.system_role)]
+        messages.append(HumanMessage(content=prompt.format(text=question)))
+        response = self.giga.invoke(messages).content
+        logger.info(response)
+
+    def lol_prompt(self, joke_prompt, dict_chain):
+        prompt = ChatPromptTemplate.from_template(joke_prompt)
+        output_parser = StrOutputParser()
+        chain = prompt | self.giga | output_parser
+        result = chain.invoke(dict_chain)
+        logger.info(result)
+        return result

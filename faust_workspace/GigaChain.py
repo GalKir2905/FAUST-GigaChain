@@ -1,22 +1,37 @@
-from gigachat import GigaChat
-import json
-import argparse
-from faust_module.log import logger
-from faust_module.GigaChain.client import FAUST_GIGACHAT
+import configparser
 import sys
-sys.tracebacklimit = 0
+import argparse
 
+from faust_module.common.log import logger
+from faust_module.GigaChain.client import FAUST_GIGACHAT
+from faust_module.common.global_vars import *
+sys.tracebacklimit = 0
+from pathlib import Path
 
 
 def main(args):
-    client_gigachat = FAUST_GIGACHAT(
-        "Y2EzYWUxZGEtN2ZhYi00NmIzLTk2NzYtZDI5NDcyYzY5MDFkOjIwYjBlNWI1LWU2OTQtNDdlYi1iYTJjLWUxMzg5MTkwOGQwOQ==",
-        "GigaChat-Pro", "Ты быдло, который пишет каждое слово через мат."
-    )
+    module_dir = Path("faust_workspace")
+    config_dir = Path("configs")
+    config = configparser.ConfigParser()
+    config.read(f"{config_dir}/conf.ini")
+    profile = config['faust_giga']
+    client_gigachat = FAUST_GIGACHAT(profile.get('authorization_key'), "GigaChat-Pro")
 
-    # client_gigachat.chat_model_longer() ## Еще не работает. Нет выхода интернет и прав на "тачку"
-    qwerty = client_gigachat.work_load_prompt("Z:\\Program\\FAUST\\FAUST-GigaChain\\faust_module\\GigaChain\\prompts\\contents\\correction.yaml")
-    logger.info(qwerty)
+    ## Еще не работает. Нет выхода интернет и прав на "тачку"
+    # client_gigachat.chat_model_longer()
+
+    ## Работает.
+    # resp = client_gigachat.correct_mistakes(f"{workspace_prompts}\\correction.yaml")
+    # client_gigachat.work_load_prompt(f"{workspace_prompts}\\translation.yaml", resp)
+
+    ## Работает.
+    # client_gigachat.lol_prompt(
+    #     "Придумай анегдот про то, как сидели {персона} и {персона_2} в баре и болтали про игры. !Условие {персона} плохо играет в стрелялки",
+    #     {"персона": "Вадим", "персона_2": "Кирилл"})
+    #
+
+    # Если одному человеку требуется три дня, чтобы выкопать яму объемом 1 куб. м, то сколько времени потребуется 30 людям, чтобы выкопать 30 таких ям?
+
 
 
 if __name__ == "__main__":
