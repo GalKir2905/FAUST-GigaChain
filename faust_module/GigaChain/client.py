@@ -37,15 +37,13 @@ class FAUST_GIGACHAT:
     def chat_model_longer(self, system_role: str ='Ты разработчик на python.'):
         messages = [SystemMessage(content=self.system_role)]
         while True:
-            # user_input = input(f"Вопрос: ")
-            # if user_input.lower() == "спасибо":
-            #     break
-            # messages.append(HumanMessage(content=user_input))
-            messages.append(HumanMessage(content="Сколько времени?"))
+            user_input = input(f"Вопрос: ")
+            if user_input.lower() == "спасибо":
+                break
+            messages.append(HumanMessage(content=user_input))
             res = self.giga.invoke(messages)
             messages.append(res)
             logger.info(f"Ответ: {res.content}")
-            break
 
     def correct_mistakes(self, path_to_prompt: str):
         prompt = load_prompt(path_to_prompt)

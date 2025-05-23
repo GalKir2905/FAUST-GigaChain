@@ -15,10 +15,10 @@ def main(args):
     config = configparser.ConfigParser()
     config.read(f"{config_dir}/conf.ini")
     profile = config['faust_giga']
-    client_gigachat = FAUST_GIGACHAT(profile.get('authorization_key'), "GigaChat-Pro")
+    client_gigachat = FAUST_GIGACHAT(profile.get('authorization_key'), "GigaChat-2-Max")
 
-    ## Еще не работает. Нет выхода интернет и прав на "тачку"
-    # client_gigachat.chat_model_longer()
+    ## Работает.
+    client_gigachat.chat_model_longer()
 
     ## Работает.
     # resp = client_gigachat.correct_mistakes(f"{workspace_prompts}\\correction.yaml")
