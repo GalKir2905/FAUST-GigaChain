@@ -1,10 +1,11 @@
-from faust_module.common.log import logger
-
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain_gigachat.chat_models import GigaChat
 from langchain.prompts import load_prompt, ChatPromptTemplate, PromptTemplate
 from langchain_experimental.smart_llm import SmartLLMChain
+
+from faust_module.common.log import logger
+from faust_module.common.global_vars import *
 
 
 class FAUST_GIGACHAT:
@@ -34,29 +35,30 @@ class FAUST_GIGACHAT:
         chain = SmartLLMChain(llm=self.giga, prompt=prompt, n_ideas=ideas, verbose=True)
         chain.run({})
 
+    def correct_mistakes(self, user_input: str,):
+        prompt = load_prompt(f"{workspace_prompts}\\correction.yaml")
+        messages = [SystemMessage(content=self.system_role)]
+        messages.append(HumanMessage(content=prompt.format(text=user_input)))
+        response = self.giga.invoke(messages).content
+        return response
+
     def chat_model_longer(self, system_role: str ='Ты разработчик на python.'):
         messages = [SystemMessage(content=self.system_role)]
         while True:
             user_input = input(f"Вопрос: ")
             if user_input.lower() == "спасибо":
                 break
-            messages.append(HumanMessage(content=user_input))
+            normal_imput = self.correct_mistakes(user_input)
+            messages.append(HumanMessage(content=normal_imput))
             res = self.giga.invoke(messages)
             messages.append(res)
             logger.info(f"Ответ: {res.content}")
 
-    def correct_mistakes(self, path_to_prompt: str):
-        prompt = load_prompt(path_to_prompt)
-        messages = [SystemMessage(content=self.system_role)]
-        user_input = input(f"Вопрос: ")
-        messages.append(HumanMessage(content=prompt.format(text=user_input)))
-        response = self.giga.invoke(messages).content
-        return response
-
     def work_load_prompt(self, path_to_prompt: str, question: str):
         prompt = load_prompt(path_to_prompt)
         messages = [SystemMessage(content=self.system_role)]
-        messages.append(HumanMessage(content=prompt.format(text=question)))
+        normal_imput = self.correct_mistakes(question)
+        messages.append(HumanMessage(content=prompt.format(text=normal_imput)))
         response = self.giga.invoke(messages).content
         logger.info(response)
 

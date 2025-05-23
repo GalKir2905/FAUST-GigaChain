@@ -21,8 +21,7 @@ def main(args):
     client_gigachat.chat_model_longer()
 
     ## Работает.
-    # resp = client_gigachat.correct_mistakes(f"{workspace_prompts}\\correction.yaml")
-    # client_gigachat.work_load_prompt(f"{workspace_prompts}\\translation.yaml", resp)
+    # client_gigachat.work_load_prompt(f"{workspace_prompts}\\translation.yaml", input(f"Вопрос: "))
 
     ## Работает.
     # client_gigachat.lol_prompt(
